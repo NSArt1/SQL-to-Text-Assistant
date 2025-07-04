@@ -1,0 +1,43 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: demo
+      POSTGRES_PASSWORD: demo
+      POSTGRES_DB: demo_db
+    volumes:
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+
+  vllm:
+    build: ./docker/vllm
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    ports:
+      - "8001:8000"
+    depends_on:
+      - db
+
+  backend:
+    build: ./docker/backend
+    depends_on:
+      - vllm
+      - db
+    environment:
+      - VLLM_ENDPOINT=http://vllm:8000/v1/completions
+      - DB_HOST=db
+      - DB_NAME=demo_db
+      - DB_USER=demo
+      - DB_PASSWORD=demo
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./docker/frontend
+    depends_on:
+      - backend
+    ports:
+      - "8501:8501"

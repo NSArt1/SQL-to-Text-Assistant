@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+pydantic
+httpx
+psycopg2-binary
+pandas
+streamlit
+sqlalchemy
+transformers==0.20.1
+accelerate
+trl
+datasets
+vllm
